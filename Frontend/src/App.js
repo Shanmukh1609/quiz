@@ -13,6 +13,7 @@ import Notlogin from "./component/notlogin.js";
 import Createquizquestion from "./component/createquizquestion.js"
 import Dashboard from './component/Dashboard.js'
 import AboutUs from "./component/About_us.js";
+import EventRegistration from "./component/events.js";
 
 
 function App() {
@@ -28,6 +29,8 @@ function App() {
         {/* <Route 
          path="/home" element={<Home/>}
         ></Route> */}
+           <Route  path="/eventreg" element={<EventRegistration/>}>
+           </Route>
           <Route  path="/Questiondemo" element={<Questiondemo/>}>
           </Route>
           <Route  path="/Adminlogin" element={<Adminlogin/>}>

@@ -71,6 +71,78 @@ const saveQuizNameToFile = (name) => {
   fs.writeFileSync(quizNameFilePath, name, "utf8");
 }
 
+
+app.post('/eventRegistration',async (req,res)=>{
+  
+   const {teamLeaderName,teamLeaderId,leadMailId,
+    teamName,MemberI ,MemberIid, MemberII, MemberIIid
+   } = req.body.data;
+
+
+   console.log(req.body.data);
+   
+   if(!teamLeaderName&&!teamLeaderId&&!leadMailId&&!
+    teamName&&!MemberI &&!MemberIid&&! MemberII&&! MemberIIid){
+
+       res.status(201).json({ok:false,RteamName:false,RmailID:false,RteamMates:false});
+    }
+
+   try{
+
+     const RteamName = await db.query ('SELECT teamName from eventRegistration where teamName = $1',[teamName]);
+     const RmailID= await db.query ('SELECT leadMailID from eventRegistration where leadMailID like $1',[leadMailId]);
+    
+console.log(RmailID.rows);
+
+     const Rteamlead = await db.query('SELECT * FROM eventRegistration WHERE memberIid=$1 or memberIIid=$1 or teamleaderId=$1',[teamLeaderId]);
+     const RteammateI = await db.query('SELECT * FROM eventRegistration WHERE memberIid=$1 or memberIIid=$1 or teamleaderId=$1',[MemberIid]);
+     const RteammateII = await db.query('SELECT * FROM eventRegistration WHERE memberIid=$1 or memberIIid=$1 or teamleaderId=$1',[MemberIIid]);
+
+     console.log(Rteamlead.rows);
+     console.log(RteammateI.rows);
+     console.log(RteammateII.rows);
+
+     if (RmailID.rows.length>0){
+      console.log('mail')
+      res.status(201).json({ok:false,RteamName:false,RmailID:true,Rteamlead:false,RteamMates:false});
+     }
+
+     else if(RteamName.rows.length>0)
+     { console.log(RteamName.rows) 
+      res.status(201).json({ok:false,RteamName:true,RmailID:false,Rteamlead:false,RteamMates:false});
+    }
+     
+     else if(Rteamlead.rows.length>0){
+      res.status(201).json({ok:false,RteamName:false,RmailID:false,Rteamlead:true,RteamMates:false});
+     }
+     
+     else if(RteammateI.rows.length>0 || RteammateII.rows.length>0){
+      res.status(201).json({ok:false,RteamName:false,RmailID:false,Rteamlead:false,RteamMates:true});
+     }
+     
+     else{
+
+      console.log("entry");
+      await db.query(
+        'INSERT INTO eventRegistration VALUES ($1,$2,$3,$4,$5,$6,$7,$8)'
+      ,[teamLeaderName,teamLeaderId,leadMailId,
+        teamName,MemberI ,MemberIid, MemberII, MemberIIid]);
+      res.status(200).json({ok:true,RteamName:false,RmailID:false,RteamMates:false});
+     
+     }
+    }
+
+    catch(e){
+      console.log(e);
+    }
+
+  //  res.status(200).json({ok:false});
+
+})
+
+
+
+
 // Route to add a question
 app.post("/addquestion", async (req, res) => {
 const receivedData1 = req.body.data;
@@ -298,6 +370,7 @@ if (matchingPassword) {
 } else {
   res.status(401).json({ error: "Invalid password" });
 }
+
 } catch (err) {
 console.error("Error logging in:", err);
 res.status(500).json({ error: "Failed to log in" });
@@ -363,6 +436,7 @@ app.post("/addMember",async(req,res)=>{
 
 // Start the server
 app.listen(port, () => {
+
 console.log(`Backend is running on http://localhost:${port}`);
 });
 
